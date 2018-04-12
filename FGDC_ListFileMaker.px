@@ -1,0 +1,93 @@
+#!/usr/bin/perl
+
+#------------------------------------------------------------------------------
+#This PERL script makes one big list for all the files found under the user supplied
+#directory.
+#Written by Matthew McCready
+#--------------------------------------------------------------------------
+
+use Getopt::Long;
+use File::Copy;
+
+use lib "/home/mccre004/File-Recurse-0.11/blib/lib";
+use File::Recurse;
+
+
+sub usage() {
+        print "Usage: $0 [-listfile=<filename>][-directory=<directory>]\n";
+        print "Example: $0 -listfile=list.txt -directory=/usr/directory\n";
+        print"where list.txt is the filename of the list file\n";
+        print "and /usr/directory is the directory where the .xml files to";
+        print " be listed are located.\n"; 
+
+}
+%gOptions;
+&GetOptions(\%gOptions, qw(listfile=s directory=s) );
+unless ($gOptions{listfile}and $gOptions{directory}) {
+        usage();
+        exit(1);
+};
+
+
+
+$Infile = $gOptions{listfile};
+$directory=$gOptions{directory};
+chdir $directory;
+$listdir ="/mtdata/geo/gpms/input/list";
+$indir="/nfs/gpms/input/fgdc";
+#system "cp $Name $listdir";
+#-------------------------tests------------------------------
+if (-e $directory){
+}else{
+print "The directory $directory could not be found! \n";
+print "Please make sure the pathname, $directory, was spelled correctly and that it exists.\n";
+exit(1);
+};
+
+
+#-------------------------------------------------------------
+my %files = Recurse([$directory], {match => '\.xml$', nomatch => '\.bak$'});
+
+print "Now making list file------------------------------------------\n\n";
+$Name = $Infile . "_fgdc_listfile.txt";
+#$ListFileName
+open OUTFILE, ">$listdir/$Name";
+
+
+foreach (sort keys %files) {
+$dir =$_;
+
+opendir DH, $dir or die "Cannot open $dir:$!";
+
+foreach $aml (readdir DH){
+$under=index($aml, "_",);
+$under1=index($aml, "_",$under+1);
+$under2=rindex($aml, "_",);
+$length=$under2-$under1-1;
+$FIPS = substr($aml,$under1+1,$length);
+$fileTypePos = rindex($aml,".");
+$dotlength=$fileTypePos-$under2-1;
+$TYPEFILE=substr($aml,$under2+1,$dotlength);
+$fileType =substr($aml,$fileTypePos+1,3);
+
+if($fileType eq "xml"){
+
+if ($aml =~ /edges/){
+print OUTFILE "$aml e p\n";
+}elsif($aml =~ /dbf/){
+print OUTFILE "$aml t p\n";
+}else{
+print OUTFILE "$aml v p\n";
+};
+
+};
+
+};
+};
+#$listdir ="/mtdata/geo/gpms/input/list";
+#$indir="/nfs/gpms/input/fgdc";
+#system "cp $Name $listdir";
+
+print "\nPlease see the listfile $Name in $listdir.\n";
+print "$Name is the listfile you use with FGDC_TVBatch to validate .xml metadata files.\n";
+

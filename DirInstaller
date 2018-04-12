@@ -1,0 +1,51 @@
+#!/usr/bin/perl
+
+#making the main directory
+system "mkdir gpms";
+system "chmod 777 gpms";
+
+
+#Making the subdirectories under gpms
+
+system "mkdir gpms/FGDC2MRF";
+system "chmod 777 gpms/FGDC2MRF";
+
+system "mkdir gpms/input";
+system "chmod 777 gpms/input";
+
+system "mkdir gpms/log";
+system "chmod 777 gpms/log";
+
+system "mkdir gpms/output";
+system "chmod 777 gpms/output";
+
+system "mkdir gpms/xsd";
+system "chmod 777 gpms/xsd";
+
+system "mkdir gpms/xsl";
+system "chmod 777 gpms/xsl";
+
+#making the directories under input
+
+system "mkdir gpms/input/fgdc";
+system "chmod 777 gpms/input/fgdc";
+
+system "mkdir gpms/input/list";
+system "chmod 777 gpms/input/list";
+
+system "mkdir gpms/input/mif";
+system "chmod 777 gpms/input/mif";
+
+#making the directories under output
+
+system "mkdir gpms/output/fgdc";
+system "chmod 777 gpms/output/fgdc";
+
+system "mkdir gpms/output/mrf";
+system "chmod 777 gpms/output/mrf";
+
+#making the directory under xsl
+
+system "mkdir gpms/xsl/xsl4mrf2fgdc";
+system "chmod 777 gpms/xsl/xsl4mrf2fgdc";
+ 

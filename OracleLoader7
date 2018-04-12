@@ -1,0 +1,78 @@
+#!/opt/gnu-solaris/bin/perl
+
+#This scripts takes a user supplied direcory of xml files that passed validation and 
+# inserts them into the Oracle database
+
+
+#setting the environmental variables. This means that the user will not have to have them in the .cshrc file.
+$ENV{ORACLE_SID}='geo10';
+$ENV{ORACLE_HOME}='/opt/oracle/app/oracle/product/10.2.0';
+$ENV{PATH}= '/usr/jdk/jdk1.5.0_04/bin:${PATH}:/opt/oracle/app/oracle/product/10.2.0/bin';
+$ENV{LD_LIBRARY_PATH}= '/opt/oracle/app/oracle/product/10.2.0/lib:/usr/lib';
+
+use DBI;
+$entity = '073';
+$dira ="/ecdata07/oracle/utl_file/gpms/marrs_dev/output/mrf";
+print "Please enter the directory under the $dira  directory where all your files to be loaded onto Oracle are located\n";
+
+chomp($dirb = <STDIN>);
+$dir= $dira . "/" . $dirb;
+
+#checking to make sure that the directory exists
+if (-e $dir){
+print "Please Wait,Now reading $dir-------------------------------\n";
+}else{
+print "Now terminating program!\n";
+print "The direcory $dirb could not be found! \n";
+die "Please make sure the direcory, $dirb, was spelled correctly.\n";
+}; 
+
+chdir $dir;
+system "pwd \n";
+
+#getting branch
+#the date string comprises eight characters
+#nesseccary to insert into database
+$dirblength =length($dirb)-8;
+$firstbranch = substr($dirb, 0, $dirblength);
+
+#getting all the xml files in $dir
+@mrf =glob "*.xml";
+
+
+#this is the connection to the Oracle Database
+my $dbh = DBI->connect( 'dbi:Oracle:geo10',
+
+                        'MARRS_DEV',
+                        'clone',
+                        {
+                          RaiseError => 1,
+                          AutoCommit => 0
+                        }
+                      ) || die "Database connection not made: $DBI::errstr";
+		      
+		     
+#run a loop here
+#inserting all the xml files into the Oracle database
+foreach $mrf (@mrf){
+print "now inserting $mrf into the Oracle database\n";
+$ins = "'/output/mrf/$dirb/$mrf'";
+$branch ="'$firstbranch'";
+#orginal method
+my $sql =qq{INSERT INTO metadata_vw VALUES( NULL, $branch, xmltype ( bfilename('MARRS_DEV', $ins), nls_charset_id('WE8ISO8859P1') ) )};#experimental3
+#print "\$sql = $sql\n";
+my $sth = $dbh->prepare( $sql );
+#always need execute
+$sth->execute();
+};
+
+$dbh->disconnect();
+
+#remooving files
+#print "now removing files from the $dir direcory\n";
+#chdir $dir;
+#foreach $mrf (@mrf){
+#system "rm $mrf";
+#};
+#chdir $dira;
+#system "rm $dir";
